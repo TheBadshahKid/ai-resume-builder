@@ -24,13 +24,43 @@ function getTier(score: number): ScoreTier {
   return TIERS[0];
 }
 
-export default function HireabilityScore({ score: targetScore }: { score: number }) {
+export default function HireabilityScore({ 
+  score: targetScore,
+  resumeText = "Senior Software Engineer with experience in React and Node.js",
+  jobDescription = "Senior React Developer with experience in AWS and Kubernetes"
+}: { 
+  score: number;
+  resumeText?: string;
+  jobDescription?: string;
+}) {
   const [animatedScore, setAnimatedScore] = useState(0);
+  const [displayScore, setDisplayScore] = useState(targetScore);
   const [prevScore, setPrevScore] = useState(0);
   const tier = getTier(animatedScore);
   const radius = 58;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (animatedScore / 100) * circumference;
+
+  useEffect(() => {
+    const fetchATSScore = async () => {
+      const parserUrl = process.env.NEXT_PUBLIC_PARSER_URL || "http://127.0.0.1:5001";
+      try {
+        const res = await fetch(`${parserUrl}/parse`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: resumeText, job_description: jobDescription }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setDisplayScore(data.score || targetScore);
+        }
+      } catch (e) {
+        console.warn("Parser service not reached, using targetScore");
+        setDisplayScore(targetScore);
+      }
+    };
+    fetchATSScore();
+  }, [targetScore, resumeText, jobDescription]);
 
   useEffect(() => {
     setPrevScore(animatedScore);
@@ -43,13 +73,12 @@ export default function HireabilityScore({ score: targetScore }: { score: number
       const progress = Math.min(elapsed / duration, 1);
       // Ease out cubic
       const eased = 1 - Math.pow(1 - progress, 3);
-      const current = Math.round(startVal + (targetScore - startVal) * eased);
+      const current = Math.round(startVal + (displayScore - startVal) * eased);
       setAnimatedScore(current);
       if (progress < 1) requestAnimationFrame(animate);
     };
     requestAnimationFrame(animate);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [targetScore]);
+  }, [displayScore]);
 
   const delta = targetScore - prevScore;
 

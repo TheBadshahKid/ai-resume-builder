@@ -88,17 +88,48 @@ export default function ChatPrompt({
     setIsTyping(true);
     onSendMessage(trimmed);
 
-    setTimeout(() => {
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "ai",
-        content: simulateAIResponse(trimmed),
-        timestamp: new Date(),
-        action: "applied",
-      };
-      setMessages((prev) => [...prev, aiMessage]);
-      setIsTyping(false);
-    }, 1200 + Math.random() * 800);
+    // Call real API if available
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5002";
+    
+    const getAIResponse = async () => {
+      try {
+        const res = await fetch(`${apiUrl}/api/ai/suggest`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: trimmed.toLowerCase().includes("star") ? "improve_bullet" : "generate_experience",
+            text: trimmed,
+            context: "Software Engineer"
+          }),
+        });
+        
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        
+        const aiMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: "ai",
+          content: data.suggestion,
+          timestamp: new Date(),
+          action: "applied",
+        };
+        setMessages((prev) => [...prev, aiMessage]);
+      } catch (err) {
+        // Fallback to simulation if backend is down
+        const aiMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: "ai",
+          content: simulateAIResponse(trimmed),
+          timestamp: new Date(),
+          action: "applied",
+        };
+        setMessages((prev) => [...prev, aiMessage]);
+      } finally {
+        setIsTyping(false);
+      }
+    };
+
+    getAIResponse();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

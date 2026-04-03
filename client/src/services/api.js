@@ -1,6 +1,7 @@
 export const suggestImprovement = async (type, text, context) => {
+  const baseUrl = import.meta.env.VITE_API_URL || '';
   try {
-    const response = await fetch('/api/ai/suggest', {
+    const response = await fetch(`${baseUrl}/api/ai/suggest`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -19,8 +20,9 @@ export const suggestImprovement = async (type, text, context) => {
 };
 
 export const analyzeResumeATS = async (text, job_description) => {
+  const baseUrl = import.meta.env.VITE_API_URL || '';
   try {
-    const response = await fetch('/api/ats/analyze', {
+    const response = await fetch(`${baseUrl}/api/ats/analyze`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
