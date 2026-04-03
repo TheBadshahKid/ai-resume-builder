@@ -1,0 +1,50 @@
+services:
+  # 1. Node.js Backend API
+  - type: web
+    name: resume-builder-api
+    runtime: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5002
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: OPENAI_API_KEY
+        sync: false
+
+  # 2. Python Parser Service
+  - type: web
+    name: resume-parser-service
+    runtime: python
+    rootDir: parser-service
+    buildCommand: pip install -r requirements.txt && python -m spacy download en_core_web_sm
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PORT
+        value: 5001
+
+  # 3. TeX Compiler Service (Docker)
+  - type: web
+    name: resume-tex-service
+    runtime: docker
+    rootDir: tex-service
+    envVars:
+      - key: PORT
+        value: 5004
+
+  # 4. LangChain API (Python)
+  - type: web
+    name: resume-langchain-api
+    runtime: python
+    rootDir: parser-service
+    buildCommand: pip install fastapi uvicorn pydantic # already in requirements? No, let's keep it separate
+    startCommand: uvicorn langchain_api:app --host 0.0.0.0 --port 5003
+    envVars:
+      - key: PORT
+        value: 5003
