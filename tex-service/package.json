@@ -1,0 +1,12 @@
+{
+  "name": "tex-compiler-service",
+  "version": "1.0.0",
+  "description": "LaTeX compilation microservice for ResumeForge",
+  "main": "compiler.js",
+  "scripts": {
+    "start": "node compiler.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
