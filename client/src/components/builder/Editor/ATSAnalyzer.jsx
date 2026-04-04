@@ -29,11 +29,7 @@ const ATSAnalyzer = () => {
     }
 
     const data = await analyzeResumeATS(resumeText, jobDescription);
-    if (data) {
-      setAtsData(data);
-    } else {
-      alert("Failed to analyze resume. Make sure python parser is running.");
-    }
+    setAtsData(data); // data is now guaranteed to be an object (local fallback or server result)
     setLoading(false);
   };
 
