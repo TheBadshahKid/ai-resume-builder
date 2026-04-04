@@ -79,6 +79,14 @@ const ATSAnalyzer = () => {
         {atsData && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-4">
             
+            {/* Fallback Indicator */}
+            {atsData.isFallback && (
+              <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 flex items-center gap-3 text-blue-700 text-xs font-medium">
+                <div className="bg-blue-100 p-1.5 rounded-full"><RefreshCcw size={14} className="animate-pulse" /></div>
+                <span>Lightweight analysis active. Full AI analysis temporarily unavailable.</span>
+              </div>
+            )}
+            
             {/* Top Stat Cards */}
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-gradient-to-br from-brand-rust to-[#8B4534] rounded-xl p-5 text-white shadow-lg relative overflow-hidden">

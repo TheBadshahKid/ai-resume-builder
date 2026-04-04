@@ -24,7 +24,7 @@ services:
     runtime: python
     rootDir: parser-service
     buildCommand: pip install -r requirements.txt && python -m spacy download en_core_web_sm
-    startCommand: gunicorn app:app
+    startCommand: gunicorn --bind 0.0.0.0:$PORT app:app
     envVars:
       - key: PORT
         value: 5001
@@ -44,7 +44,7 @@ services:
     runtime: python
     rootDir: parser-service
     buildCommand: pip install fastapi uvicorn pydantic # already in requirements? No, let's keep it separate
-    startCommand: uvicorn langchain_api:app --host 0.0.0.0 --port 5003
+    startCommand: uvicorn langchain_api:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PORT
         value: 5003

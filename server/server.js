@@ -59,6 +59,59 @@ if (process.env.MONGODB_URI) {
     mongoose.set('bufferCommands', false); // Prevents infinite hanging
 }
 
+// --- Lightweight ATS Fallback ---
+const simplifiedAtsAnalysis = (resumeText, jobDescription) => {
+  const text = resumeText.toLowerCase();
+  const jd = jobDescription ? jobDescription.toLowerCase() : "";
+  
+  const sections = {
+    experience: /experience|employment|work history/i.test(text),
+    education: /education|university|college/i.test(text),
+    skills: /skills|technologies|proficiencies/i.test(text),
+    projects: /projects|portfolio/i.test(text)
+  };
+
+  const sectionScore = Object.values(sections).filter(Boolean).length * 10;
+  
+  let keywordScore = 20;
+  let matchedKeywords = [];
+  let missingKeywords = [];
+
+  if (jd) {
+    const commonKeywords = ["javascript", "react", "node", "python", "sql", "aws", "docker", "agile", "git", "typescript", "graphql"];
+    const jdWords = jd.split(/\W+/);
+    const resumeWords = text.split(/\W+/);
+    
+    const targetKeywords = commonKeywords.filter(k => jdWords.includes(k));
+    matchedKeywords = targetKeywords.filter(k => resumeWords.includes(k));
+    missingKeywords = targetKeywords.filter(k => !resumeWords.includes(k));
+    
+    if (targetKeywords.length > 0) {
+      keywordScore = Math.floor((matchedKeywords.length / targetKeywords.length) * 40);
+    }
+  }
+
+  const wordCount = resumeText.split(/\s+/).length;
+  const formattingScore = (wordCount >= 300 && wordCount <= 1000) ? 20 : 10;
+  
+  const totalScore = sectionScore + keywordScore + formattingScore;
+
+  return {
+    status: "success",
+    isFallback: true,
+    score: Math.min(100, totalScore),
+    job_match_percentage: jd ? Math.floor((matchedKeywords.length / (matchedKeywords.length + missingKeywords.length || 1)) * 100) : 0,
+    matched_keywords: matchedKeywords,
+    missing_keywords: missingKeywords,
+    suggestions: [
+      "Using lightweight analysis (Python parser unavailable).",
+      jd ? "" : "Add a job description for better keyword matching.",
+      sections.experience ? "" : "Add a clear 'Experience' section.",
+      sections.skills ? "" : "Add a clear 'Skills' section."
+    ].filter(Boolean)
+  };
+};
+
 // ATS Analyzer Route
 app.post('/api/ats/analyze', async (req, res) => {
   try {
@@ -68,23 +121,30 @@ app.post('/api/ats/analyze', async (req, res) => {
       return res.status(400).json({ error: "Missing resume text" });
     }
 
-    // Forward to Python microservice
+    // Try Python Parser
     const pythonServiceUrl = process.env.PYTHON_PARSER_URL || 'http://127.0.0.1:5001/parse';
+    console.log(`Attempting ATS analysis via Python service: ${pythonServiceUrl}`);
     
-    const response = await fetch(pythonServiceUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ text, job_description }),
-    });
+    try {
+      const response = await fetch(pythonServiceUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, job_description }),
+        signal: AbortSignal.timeout(5000) // 5s timeout
+      });
 
-    if (!response.ok) {
-      throw new Error(`Python service responded with status: ${response.status}`);
+      if (response.ok) {
+        const data = await response.json();
+        return res.json({ ...data, isFallback: false });
+      }
+      console.warn(`Python service returned status ${response.status}. Using Node.js fallback.`);
+    } catch (err) {
+      console.warn(`Python service unreachable (${err.message}). Using Node.js fallback.`);
     }
 
-    const data = await response.json();
-    return res.json(data);
+    // Fallback to local analysis
+    const fallbackData = simplifiedAtsAnalysis(text, job_description);
+    return res.json(fallbackData);
     
   } catch (error) {
     console.error('ATS Analysis Error:', error);
