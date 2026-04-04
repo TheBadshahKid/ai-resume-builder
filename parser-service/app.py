@@ -6,7 +6,13 @@ import math
 import os
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": [
+    "https://ai-resume-builder-dk7b.vercel.app", 
+    "http://localhost:3000", 
+    "http://localhost:3001",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173"
+]}})
 
 # Attempt to load spacy model, fallback to basic text processing if not available
 try:

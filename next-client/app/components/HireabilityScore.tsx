@@ -43,9 +43,10 @@ export default function HireabilityScore({
 
   useEffect(() => {
     const fetchATSScore = async () => {
-      const parserUrl = process.env.NEXT_PUBLIC_PARSER_URL || "http://127.0.0.1:5001";
+      // Use the Node server as a proxy to avoid direct Python CORS issues
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5002";
       try {
-        const res = await fetch(`${parserUrl}/parse`, {
+        const res = await fetch(`${apiUrl}/api/ats/analyze`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ text: resumeText, job_description: jobDescription }),
@@ -55,7 +56,7 @@ export default function HireabilityScore({
           setDisplayScore(data.score || targetScore);
         }
       } catch (e) {
-        console.warn("Parser service not reached, using targetScore");
+        console.warn("Backend API not reached, using targetScore fallback");
         setDisplayScore(targetScore);
       }
     };

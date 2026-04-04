@@ -17,7 +17,13 @@ app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(compression()); // Gzip payload compression
 app.use(cors({
-  origin: '*',
+  origin: [
+    'https://ai-resume-builder-dk7b.vercel.app', 
+    'http://localhost:3000', 
+    'http://localhost:5173',
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:5173'
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -122,8 +128,11 @@ app.post('/api/ats/analyze', async (req, res) => {
     }
 
     // Try Python Parser
-    const pythonServiceUrl = process.env.PYTHON_PARSER_URL || 'http://127.0.0.1:5001/parse';
-    console.log(`Attempting ATS analysis via Python service: ${pythonServiceUrl}`);
+    // Default to internal Render hostname if possible, then env var, then localhost
+    const internalRenderUrl = 'http://resume-parser-service:5001/parse';
+    const pythonServiceUrl = process.env.PYTHON_PARSER_URL || internalRenderUrl;
+    
+    console.log(`Attempting ATS analysis via: ${pythonServiceUrl}`);
     
     try {
       const response = await fetch(pythonServiceUrl, {
