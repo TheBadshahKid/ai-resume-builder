@@ -20,7 +20,7 @@ const navItems = [
 ];
 
 const ResumeBuilder = () => {
-  const { resumeData, activeTemplate, setActiveTemplate, atsData } = useResume();
+  const { activeTemplate, setActiveTemplate, atsData } = useResume();
   const [activeTab, setActiveTab] = useState('personal');
 
   const renderLeftPanel = () => {
@@ -29,7 +29,7 @@ const ResumeBuilder = () => {
     if (activeTab === 'templates') {
       return (
         <div className="p-6">
-          <h2 className="text-xl font-bold mb-2 text-gray-800 font-display">Choose a Layout</h2>
+          <h2 className="text-xl font-bold mb-2 text-gray-800 dark:text-gray-100 font-display">Choose a Layout</h2>
           <p className="text-sm text-gray-500 mb-6">All templates are ATS-friendly and recruiter-approved.</p>
           <div className="grid grid-cols-2 gap-4">
             {[
@@ -40,18 +40,18 @@ const ResumeBuilder = () => {
                 key={t.id}
                 className={`cursor-pointer rounded-xl overflow-hidden border-2 transition-all ${
                   activeTemplate === t.id
-                    ? 'border-brand-rust shadow-lg shadow-brand-rust/10'
-                    : 'border-gray-200 opacity-70 hover:opacity-100 hover:border-gray-300'
+                    ? 'border-brand-rust shadow-lg shadow-brand-rust/20'
+                    : 'border-gray-200 dark:border-gray-700 opacity-70 hover:opacity-100 hover:border-gray-300 dark:hover:border-gray-500'
                 }`}
                 onClick={() => setActiveTemplate(t.id)}
               >
                 <div className={`h-28 flex items-center justify-center ${
-                  activeTemplate === t.id ? 'bg-orange-50' : 'bg-gray-100'
+                  activeTemplate === t.id ? 'bg-orange-50 dark:bg-orange-900/20' : 'bg-gray-100 dark:bg-gray-800'
                 }`}>
-                  <FileText size={36} className={activeTemplate === t.id ? 'text-brand-rust' : 'text-gray-400'} />
+                  <FileText size={36} className={activeTemplate === t.id ? 'text-brand-rust' : 'text-gray-400 dark:text-gray-500'} />
                 </div>
-                <div className="p-3 bg-white border-t border-gray-100">
-                  <div className="font-semibold text-gray-800 text-sm">{t.label}</div>
+                <div className="p-3 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
+                  <div className="font-semibold text-gray-800 dark:text-gray-200 text-sm">{t.label}</div>
                   <div className="text-xs text-gray-400 mt-0.5">{t.desc}</div>
                 </div>
               </div>
@@ -65,19 +65,11 @@ const ResumeBuilder = () => {
   };
 
   return (
-    <div className="flex h-full overflow-hidden bg-[#111113]">
+    <div className="flex h-full overflow-hidden bg-gray-50 dark:bg-[#111113] transition-colors duration-300">
 
       {/* ── Sidebar ── */}
-      <div className="w-[62px] lg:w-52 bg-[#18181A] border-r border-white/5 flex flex-col py-4">
-        {/* Logo mark */}
-        <div className="px-3 lg:px-4 mb-6 hidden lg:flex items-center gap-2">
-          <div className="w-7 h-7 bg-brand-rust rounded-lg flex items-center justify-center">
-            <FileText size={14} className="text-white" />
-          </div>
-          <span className="font-bold text-white text-sm font-display">Resume<span className="text-brand-rust">AI</span></span>
-        </div>
-
-        <nav className="flex-1 space-y-1 px-2">
+      <div className="w-[62px] lg:w-52 bg-white dark:bg-[#18181A] border-r border-gray-200 dark:border-white/5 flex flex-col py-4 transition-colors duration-300">
+        <nav className="flex-1 space-y-1 px-2 pt-2">
           {navItems.map(item => (
             <button
               key={item.id}
@@ -86,8 +78,8 @@ const ResumeBuilder = () => {
                 activeTab === item.id
                   ? item.highlight
                     ? 'bg-brand-rust text-white shadow-lg shadow-brand-rust/25'
-                    : 'bg-white/10 text-white'
-                  : 'text-gray-500 hover:text-gray-200 hover:bg-white/5'
+                    : 'bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white'
+                  : 'text-gray-500 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5'
               }`}
             >
               <div className="flex-shrink-0">{item.icon}</div>
@@ -105,19 +97,19 @@ const ResumeBuilder = () => {
 
         {/* Bottom hint */}
         <div className="px-3 pb-2 hidden lg:block">
-          <div className="text-[10px] text-gray-700 text-center">
-            Draft auto-saved in state
+          <div className="text-[10px] text-gray-400 dark:text-gray-600 text-center">
+            Draft auto-saved
           </div>
         </div>
       </div>
 
       {/* ── Editor Panel ── */}
-      <div className="w-full lg:w-[42%] h-full overflow-y-auto bg-white border-r border-gray-100 shadow-2xl z-10">
+      <div className="w-full lg:w-[42%] h-full overflow-y-auto bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 shadow-2xl z-10 transition-colors duration-300">
         {renderLeftPanel()}
       </div>
 
       {/* ── Preview Panel ── */}
-      <div className="hidden lg:flex flex-1 h-full bg-[#1a1a1d] p-8 overflow-y-auto items-start justify-center">
+      <div className="hidden lg:flex flex-1 h-full bg-gray-100 dark:bg-[#1a1a1d] p-8 overflow-y-auto items-start justify-center transition-colors duration-300 custom-scrollbar">
         <ResumePreview />
       </div>
     </div>

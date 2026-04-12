@@ -9,7 +9,7 @@
     scroll-behavior: smooth;
   }
   body {
-    @apply bg-[#0f0f11] text-gray-200;
+    @apply bg-[#F9FAFB] text-gray-900 dark:bg-[#0f0f11] dark:text-gray-200 transition-colors duration-300;
     font-family: 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -18,7 +18,29 @@
     font-family: 'Outfit', sans-serif;
   }
 
-  /* Custom dark scrollbar */
+  /* Global Form Dark Mode Support */
+  input[type="text"], input[type="email"], input[type="password"], textarea {
+    @apply dark:bg-[#1a1a1d] dark:border-[#333] dark:text-white dark:focus:border-brand-rust dark:focus:ring-brand-rust transition-colors duration-200;
+  }
+  label {
+    @apply dark:text-gray-400;
+  }
+  
+  /* Reset some hardcoded form boxes for dark mode */
+  .dark .bg-gray-50, .dark .bg-orange-50 {
+    @apply bg-black/20 border-white/5;
+  }
+  .dark .border-gray-200, .dark .border-gray-300 {
+    @apply border-white/10;
+  }
+  .dark .text-gray-800, .dark .text-gray-900, .dark .text-gray-700 {
+    @apply text-gray-200;
+  }
+  .dark .text-gray-500 {
+    @apply text-gray-400;
+  }
+
+  /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -27,11 +49,10 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: #333;
-    border-radius: 9999px;
+    @apply bg-gray-300 dark:bg-[#333] rounded-full;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #555;
+    @apply bg-gray-400 dark:bg-[#555];
   }
 }
 

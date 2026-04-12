@@ -1,38 +1,75 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { useResume } from '../../../context/ResumeContext';
 import ModernTemplate from '../Templates/ModernTemplate';
 import ClassicTemplate from '../Templates/ClassicTemplate';
-import { Download } from 'lucide-react';
+import { Download, ZoomIn, ZoomOut, Maximize } from 'lucide-react';
 
 const ResumePreview = () => {
   const { activeTemplate, resumeData } = useResume();
   const componentRef = useRef();
+  
+  // Start with a scale that fits most screens, but allow zoom
+  const [scale, setScale] = useState(0.85);
 
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
     documentTitle: `${resumeData.personal.fullName || 'Resume'}_ATS`,
   });
 
+  const zoomIn = () => setScale(s => Math.min(s + 0.1, 1.5));
+  const zoomOut = () => setScale(s => Math.max(s - 0.1, 0.4));
+  const resetZoom = () => setScale(0.85);
+
   return (
-    <div className="flex flex-col items-center w-full max-w-4xl">
-      <div className="w-full flex justify-between items-center mb-6">
-        <h3 className="text-xl font-bold text-gray-800">Live Preview</h3>
-        <button
-          onClick={handlePrint}
-          className="bg-brand-rust hover:bg-[#8B4534] text-white px-6 py-2.5 rounded-lg shadow-lg flex items-center gap-2 font-medium transition-all transform hover:scale-105"
-        >
-          <Download size={18} />
-          Export ATS PDF
-        </button>
+    <div className="flex flex-col items-center w-full h-full">
+      {/* ── Top Bar ── */}
+      <div className="w-full max-w-[794px] flex justify-between items-center mb-6 px-2 shrink-0">
+        <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200 font-display">Live Preview</h3>
+        
+        <div className="flex items-center gap-4">
+          <div className="flex items-center bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <button onClick={zoomOut} className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700" title="Zoom Out">
+              <ZoomOut size={18} />
+            </button>
+            <span className="text-sm font-medium px-2 text-gray-700 dark:text-gray-300 w-12 text-center">
+              {Math.round(scale * 100)}%
+            </span>
+            <button onClick={zoomIn} className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700" title="Zoom In">
+              <ZoomIn size={18} />
+            </button>
+            <div className="w-px h-5 bg-gray-300 dark:bg-gray-600"></div>
+            <button onClick={resetZoom} className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700" title="Fit to Screen">
+              <Maximize size={16} />
+            </button>
+          </div>
+
+          <button
+            onClick={handlePrint}
+            className="bg-brand-rust hover:bg-[#8B4534] text-white px-5 py-2.5 rounded-lg shadow-lg shadow-brand-rust/20 flex items-center gap-2 font-medium transition-all transform hover:scale-105"
+          >
+            <Download size={18} />
+            Export PDF
+          </button>
+        </div>
       </div>
 
-      {/* A4 Paper Container Wrapper for scale/shadow */}
-      <div className="w-full bg-white shadow-2xl overflow-hidden rounded-sm" style={{ aspectRatio: '210/297' }}>
-         <div ref={componentRef} className="w-full h-full bg-white text-black p-0 print:m-0 print:p-0">
-            {/* The actual templates */}
-            {activeTemplate === 'modern' ? <ModernTemplate /> : <ClassicTemplate />}
-         </div>
+      {/* ── Overleaf Style Canvas Area ── */}
+      <div className="flex-1 w-full overflow-auto flex justify-center items-start pb-20 custom-scrollbar relative">
+        <div 
+          className="transition-transform duration-200 origin-top flex justify-center"
+          style={{ transform: `scale(${scale})` }}
+        >
+          {/* A4 Paper Dimensions (210mm x 297mm) rendered strictly at 794px x 1123px (96dpi) */}
+          <div 
+            className="bg-white shadow-2xl overflow-hidden print:w-full print:h-full print:shadow-none"
+            style={{ width: '794px', minHeight: '1123px' }}
+          >
+             <div ref={componentRef} className="w-full h-full bg-white text-black p-0 print:m-0 print:p-0">
+                {activeTemplate === 'modern' ? <ModernTemplate /> : <ClassicTemplate />}
+             </div>
+          </div>
+        </div>
       </div>
     </div>
   );
