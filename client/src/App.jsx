@@ -220,7 +220,7 @@ function Home() {
           </div>
           <span className="font-bold text-gray-600 dark:text-gray-400">ResumeAI</span>
         </div>
-        Built with 💙 · AI by Groq (Llama 3) · © {new Date().getFullYear()} created by Sachin Kumar
+        Crafted with precision · AI by Groq (Llama 3) · © {new Date().getFullYear()} created by Sachin Kumar
       </footer>
     </div>
   );
