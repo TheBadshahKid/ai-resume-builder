@@ -175,16 +175,26 @@ app.post('/api/ai/suggest', async (req, res) => {
       await new Promise(r => setTimeout(r, 600));
       
       if (type === 'improve_bullet') {
-        return res.json({ suggestion: `Effectively drove cross-functional initiatives leading to a 20% increase in measurable outcomes for ${context || 'the team'}.` });
+        return res.json({ suggestion: `Spearheaded ${context || 'key'} initiatives, delivering a measurable 25% improvement in team efficiency and achieving all project milestones ahead of schedule.` });
       }
       if (type === 'suggest_skills') {
-        return res.json({ suggestion: "Docker, Kubernetes, AWS, TypeScript, GraphQL" });
+        const roleSkillMap = {
+          frontend: 'TypeScript, GraphQL, Next.js, Cypress, Webpack',
+          backend: 'Docker, Kubernetes, Redis, PostgreSQL, gRPC',
+          fullstack: 'TypeScript, Docker, GraphQL, Redis, CI/CD',
+          data: 'Pandas, TensorFlow, Scikit-learn, SQL, Tableau',
+          devops: 'Terraform, Kubernetes, Ansible, Prometheus, Grafana',
+          default: 'Docker, Kubernetes, AWS, TypeScript, GraphQL'
+        };
+        const role = (context || '').toLowerCase();
+        const matchedKey = Object.keys(roleSkillMap).find(k => role.includes(k)) || 'default';
+        return res.json({ suggestion: roleSkillMap[matchedKey] });
       }
       if (type === 'suggest_keywords') {
         return res.json({ suggestion: "Agile, CI/CD, Microservices, Scalability, TDD" });
       }
       if (type === 'generate_experience') {
-        return res.json({ suggestion: "Engineered scalable microservices improving throughput by 40%.\nLed a cross-functional team to deliver project X ahead of schedule.\nOptimized database queries saving $10k in monthly cloud costs."});
+        return res.json({ suggestion: `Engineered scalable microservices architecture improving system throughput by 40% and reducing latency by 30%.\nLed a cross-functional team of 5 engineers to deliver project ahead of schedule, saving the company $15k.\nOptimized database queries and introduced caching strategies, cutting monthly cloud infrastructure costs by $10k.`});
       }
       return res.json({ suggestion: "AI Suggestion for " + type });
     }
@@ -215,7 +225,7 @@ app.post('/api/ai/suggest', async (req, res) => {
       ],
       model: "gpt-3.5-turbo",
       temperature: 0.7,
-      max_tokens: 100
+      max_tokens: 300
     });
 
     const suggestion = completion.choices[0].message.content.trim();

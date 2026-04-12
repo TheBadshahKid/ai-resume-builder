@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useResume } from '../../../../context/ResumeContext';
-import { Plus, Trash2, Zap, GripVertical, Sparkles } from 'lucide-react';
+import { Plus, Trash2, Zap, GripVertical, Sparkles, CheckCircle2, AlertCircle, X } from 'lucide-react';
 import { suggestImprovement } from '../../../../services/api';
 import {
   DndContext,
@@ -19,7 +19,21 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-const SortableExperienceItem = ({ exp, updateExperience, removeExperience, handleAIImprove, improvingId, handleAutoGenerate, generatingId }) => {
+const Toast = ({ message, type = 'success' }) => (
+  <div className={`text-xs font-medium flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border animate-in slide-in-from-top-1 duration-200 ${
+    type === 'success'
+      ? 'bg-green-50 text-green-700 border-green-200'
+      : 'bg-red-50 text-red-700 border-red-200'
+  }`}>
+    {type === 'success' ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
+    {message}
+  </div>
+);
+
+const SortableExperienceItem = ({
+  exp, updateExperience, removeExperience,
+  handleAIImprove, improvingId, handleAutoGenerate, generatingId, toast, toastId
+}) => {
   const {
     attributes,
     listeners,
@@ -51,14 +65,18 @@ const SortableExperienceItem = ({ exp, updateExperience, removeExperience, handl
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div className="relative">
             <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Job Title</label>
-            <input type="text" value={exp.jobTitle} onChange={(e) => updateExperience(exp.id, 'jobTitle', e.target.value)} className="w-full p-2 border border-gray-300 rounded focus:ring-1 focus:ring-brand-rust outline-none" />
-            
+            <input
+              type="text"
+              value={exp.jobTitle}
+              onChange={(e) => updateExperience(exp.id, 'jobTitle', e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded focus:ring-1 focus:ring-brand-rust outline-none pr-8"
+            />
             {exp.jobTitle.length > 2 && (
               <button 
                 onClick={() => handleAutoGenerate(exp)}
                 disabled={generatingId === exp.id}
-                title="Auto-write role specific bullets from scratch!"
-                className="absolute right-2 top-8 text-brand-rust hover:text-orange-500 disabled:opacity-50"
+                title="Auto-generate ATS-friendly bullet points for this role"
+                className="absolute right-2 top-8 text-brand-rust hover:text-orange-500 disabled:opacity-50 transition-colors"
               >
                 <Sparkles size={16} className={generatingId === exp.id ? 'animate-spin' : ''} />
               </button>
@@ -79,16 +97,22 @@ const SortableExperienceItem = ({ exp, updateExperience, removeExperience, handl
         </div>
         
         <div className="relative">
-          <label className="block text-xs font-semibold text-gray-500 uppercase mb-1 flex justify-between items-center">
-            <span>Description / Bullets</span>
-            <button 
-                onClick={() => handleAIImprove(exp)}
-                disabled={improvingId === exp.id || !exp.description}
-                className="flex items-center gap-1 text-[10px] bg-brand-zinc text-brand-rust px-2 py-1 rounded hover:bg-gray-800 disabled:opacity-50"
-            >
-              <Zap size={12} className={improvingId === exp.id ? 'animate-pulse' : ''} />
-              {improvingId === exp.id ? 'Improving...' : 'Smart Improve'}
-            </button>
+          <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
+            <div className="flex justify-between items-center w-full">
+              <span>Description / Bullets</span>
+              <div className="flex items-center gap-2">
+                {/* Inline toast feedback */}
+                {toastId === exp.id && toast && <Toast message={toast.message} type={toast.type} />}
+                <button 
+                    onClick={() => handleAIImprove(exp)}
+                    disabled={improvingId === exp.id || !exp.description}
+                    className="flex items-center gap-1 text-[10px] bg-brand-zinc text-brand-rust px-2 py-1 rounded hover:bg-gray-800 disabled:opacity-50 transition-colors"
+                >
+                  <Zap size={12} className={improvingId === exp.id ? 'animate-pulse' : ''} />
+                  {improvingId === exp.id ? 'Improving...' : 'Smart Improve'}
+                </button>
+              </div>
+            </div>
           </label>
           <textarea 
               value={exp.description} 
@@ -107,6 +131,8 @@ const ExperienceForm = () => {
   const { resumeData, updateExperience, addExperience, removeExperience, reorderExperience } = useResume();
   const [improvingId, setImprovingId] = useState(null);
   const [generatingId, setGeneratingId] = useState(null);
+  const [toast, setToast] = useState(null);
+  const [toastId, setToastId] = useState(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -124,11 +150,24 @@ const ExperienceForm = () => {
     }
   };
 
+  const showToast = (id, message, type = 'success') => {
+    setToastId(id);
+    setToast({ message, type });
+    setTimeout(() => {
+      setToast(null);
+      setToastId(null);
+    }, 3000);
+  };
+
   const handleAIImprove = async (exp) => {
+    if (!exp.description) return;
     setImprovingId(exp.id);
     const suggestion = await suggestImprovement('improve_bullet', exp.description, exp.jobTitle);
     if (suggestion) {
-       updateExperience(exp.id, 'description', suggestion);
+      updateExperience(exp.id, 'description', suggestion);
+      showToast(exp.id, 'Bullet improved!', 'success');
+    } else {
+      showToast(exp.id, 'Could not reach AI. Try again.', 'error');
     }
     setImprovingId(null);
   };
@@ -137,8 +176,10 @@ const ExperienceForm = () => {
     setGeneratingId(exp.id);
     const suggestion = await suggestImprovement('generate_experience', exp.jobTitle, '');
     if (suggestion) {
-       // Replace any mocked formatting returned and set the bullets
-       updateExperience(exp.id, 'description', suggestion);
+      updateExperience(exp.id, 'description', suggestion);
+      showToast(exp.id, 'Bullets generated!', 'success');
+    } else {
+      showToast(exp.id, 'Could not generate. Try again.', 'error');
     }
     setGeneratingId(null);
   };
@@ -172,6 +213,8 @@ const ExperienceForm = () => {
                 improvingId={improvingId}
                 handleAutoGenerate={handleAutoGenerate}
                 generatingId={generatingId}
+                toast={toast}
+                toastId={toastId}
               />
             ))}
           </div>

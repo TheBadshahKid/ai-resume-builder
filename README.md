@@ -1,7 +1,7 @@
 # 🚀 ResumeForge AI: The "Prompt-Based" LaTeX Builder
 
-[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js)](https://nextjs.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
+[![React](https://img.shields.io/badge/React-18-blue?style=flat-square&logo=react)](https://react.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-v3-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
 [![LangChain](https://img.shields.io/badge/AI-LangChain-white?style=flat-square&logo=chainlink)](https://www.langchain.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 
@@ -13,7 +13,7 @@ ResumeForge is a high-performance, AI-powered resume building ecosystem designed
 
 ```mermaid
 graph TD
-    User((User)) -->|Prompts| Frontend[Next.js 15 Dark UI]
+    User((User)) -->|Prompts| Frontend[React + Vite UI]
     Frontend -->|Orchestration| Backend[Node.js / Express API]
     Frontend -->|AI Intelligence| LangChain[Python FastAPI + LangChain]
     LangChain -->|STAR Method| OpenAI[LLM Pipeline]
@@ -31,13 +31,13 @@ graph TD
 - **Gamified Hireability Dashboard**: Real-time circular score (0-100) that updates as you improve your resume. Includes live "Keyword Gap" analysis.
 - **LaTeX Rendering Engine**: Decouples LaTeX complexity from the user. Get the gold-standard typography of `.tex` templates without writing a single line of code.
 - **ATS Keyword Parser**: Semantically analyzes your resume against any Job Description (JD) to ensure you pass through automated screening filters.
-- **Stunning Dark Mode**: A premium, "glassy" developer-first aesthetic with ambient glow and micro-animations.
+- **Modern Responsive UI**: A premium, "glassy" developer-first aesthetic with ambient glow and micro-animations.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: Next.js 15 (App Router), Tailwind CSS v4, Framer Motion, Lucide Icons.
+- **Frontend**: React 18, Vite, Tailwind CSS v3, Lucide Icons.
 - **Backend API**: Node.js, Express, JWT Authentication.
 - **AI Layer**: Python 3.9+, LangChain, OpenAI, FastAPI.
 - **Parsing/NLP**: Python, Spacy, Flask.
@@ -62,7 +62,6 @@ cd ai-resume-builder
 npm install
 cd client && npm install
 cd ../server && npm install
-cd ../next-client && npm install
 cd ../parser-service && pip install -r requirements.txt
 ```
 
@@ -72,14 +71,12 @@ Run all services concurrently with a single command:
 npm run dev
 ```
 
-The apps will be available at:
-- **Main App (Next.js)**: [http://localhost:3000](http://localhost:3000)
-- **Classic Builder (Vite)**: [http://localhost:5173](http://localhost:5173)
+The app will be available at:
+- **Resume Builder**: [http://localhost:5173](http://localhost:5173)
 
 ---
 
 ## 🎯 Development Roadmaps
-- [x] Next.js 15 Migration & Dark Mode UI.
 - [x] STAR Method AI Integration.
 - [x] LaTeX Serverless Compiler Integration.
 - [ ] Multi-template LaTeX Library.
