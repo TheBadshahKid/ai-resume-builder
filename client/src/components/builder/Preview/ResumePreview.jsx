@@ -10,18 +10,48 @@ import { Download, ZoomIn, ZoomOut, Maximize } from 'lucide-react';
 const ResumePreview = () => {
   const { activeTemplate, resumeData } = useResume();
   const componentRef = useRef();
+  const containerRef = useRef();
   
-  // Start with a 1.0 (100%) scale so it strictly overflows into an expansive workspace View
+  // Dynamic scale state
   const [scale, setScale] = useState(1.0);
+
+  // Auto fit-to-width on mount and window resize
+  useEffect(() => {
+    const fitToWidth = () => {
+      if (containerRef.current) {
+        // Leave 60px total horizontal padding
+        const availableWidth = containerRef.current.clientWidth - 60;
+        // Calculate required scale to make 794px fit the available width
+        let newScale = availableWidth / 794;
+        // Bound the scale between normal readable sizes
+        newScale = Math.min(Math.max(newScale, 0.4), 2.5);
+        setScale(newScale);
+      }
+    };
+
+    fitToWidth();
+    // Small delay to ensure flex layout has settled
+    setTimeout(fitToWidth, 100);
+
+    window.addEventListener('resize', fitToWidth);
+    return () => window.removeEventListener('resize', fitToWidth);
+  }, []);
 
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
     documentTitle: `${resumeData.personal.fullName || 'Resume'}_ATS`,
   });
 
-  const zoomIn = () => setScale(s => Math.min(s + 0.1, 1.5));
+  const zoomIn = () => setScale(s => Math.min(s + 0.1, 2.5));
   const zoomOut = () => setScale(s => Math.max(s - 0.1, 0.4));
-  const resetZoom = () => setScale(1.0);
+  const resetZoom = () => {
+    if (containerRef.current) {
+        const availableWidth = containerRef.current.clientWidth - 60;
+        setScale(availableWidth / 794);
+    } else {
+        setScale(1.0);
+    }
+  };
 
   const renderActiveTemplate = () => {
     switch (activeTemplate) {
@@ -68,10 +98,17 @@ const ResumePreview = () => {
       </div>
 
       {/* ── Overleaf Style Canvas Area ── */}
-      <div className="flex-1 w-full overflow-auto flex justify-center items-start pb-20 custom-scrollbar relative">
+      <div 
+        ref={containerRef}
+        className="flex-1 w-full overflow-auto flex justify-center items-start pb-20 custom-scrollbar relative"
+      >
         <div 
-          className="transition-transform duration-200 origin-top flex justify-center"
-          style={{ transform: `scale(${scale})` }}
+          className="transition-transform duration-200 flex justify-center"
+          style={{ 
+            transform: `scale(${scale})`, 
+            transformOrigin: 'top center',
+            marginBottom: `${(1123 * scale) - 1123}px` // Fixes scrollbar cut-off from transform
+          }}
         >
           {/* A4 Paper Dimensions (210mm x 297mm) rendered strictly at 794px x 1123px (96dpi) */}
           <div 
