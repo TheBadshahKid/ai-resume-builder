@@ -3,14 +3,16 @@ import { useReactToPrint } from 'react-to-print';
 import { useResume } from '../../../context/ResumeContext';
 import ModernTemplate from '../Templates/ModernTemplate';
 import ClassicTemplate from '../Templates/ClassicTemplate';
+import MinimalistTemplate from '../Templates/MinimalistTemplate';
+import ExecutiveTemplate from '../Templates/ExecutiveTemplate';
 import { Download, ZoomIn, ZoomOut, Maximize } from 'lucide-react';
 
 const ResumePreview = () => {
   const { activeTemplate, resumeData } = useResume();
   const componentRef = useRef();
   
-  // Start with a scale that fits most screens, but allow zoom
-  const [scale, setScale] = useState(0.85);
+  // Start with a 1.0 (100%) scale so it strictly overflows into an expansive workspace View
+  const [scale, setScale] = useState(1.0);
 
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
@@ -19,7 +21,18 @@ const ResumePreview = () => {
 
   const zoomIn = () => setScale(s => Math.min(s + 0.1, 1.5));
   const zoomOut = () => setScale(s => Math.max(s - 0.1, 0.4));
-  const resetZoom = () => setScale(0.85);
+  const resetZoom = () => setScale(1.0);
+
+  const renderActiveTemplate = () => {
+    switch (activeTemplate) {
+      case 'classic': return <ClassicTemplate />;
+      case 'minimal': return <MinimalistTemplate />;
+      case 'executive': return <ExecutiveTemplate />;
+      case 'modern':
+      default:
+        return <ModernTemplate />;
+    }
+  };
 
   return (
     <div className="flex flex-col items-center w-full h-full">
@@ -66,7 +79,7 @@ const ResumePreview = () => {
             style={{ width: '794px', minHeight: '1123px' }}
           >
              <div ref={componentRef} className="w-full h-full bg-white text-black p-0 print:m-0 print:p-0">
-                {activeTemplate === 'modern' ? <ModernTemplate /> : <ClassicTemplate />}
+                {renderActiveTemplate()}
              </div>
           </div>
         </div>

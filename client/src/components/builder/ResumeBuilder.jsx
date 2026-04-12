@@ -34,7 +34,9 @@ const ResumeBuilder = () => {
           <div className="grid grid-cols-2 gap-4">
             {[
               { id: 'modern', label: 'Modern Glass', desc: 'Clean sidebar design' },
-              { id: 'classic', label: 'Classic ATS', desc: 'Traditional format' }
+              { id: 'classic', label: 'Classic ATS', desc: 'Traditional format' },
+              { id: 'minimal', label: 'Minimalist UI', desc: 'Clean, wide spacing' },
+              { id: 'executive', label: 'Executive Form', desc: 'Heavily structured' }
             ].map(t => (
               <div
                 key={t.id}
