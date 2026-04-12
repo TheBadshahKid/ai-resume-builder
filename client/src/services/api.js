@@ -18,7 +18,7 @@ const localAiMock = (type, context) => {
     return 'Improved bullet point (Offline Mode): Reduced overhead by 15% through implementing scalable architecture solutions, ensuring 99.9% uptime.';
   }
   
-  if (type === 'generate_bullets') {
+  if (type === 'generate_experience') {
     return '• Spearheaded the development of core application features resulting in 20% increased user retention.\n• Collaborated with cross-functional teams to integrate RESTful APIs seamlessly.\n• Optimized database queries, cutting response time by an average of 40%.';
   }
   
