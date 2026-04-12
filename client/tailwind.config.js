@@ -9,7 +9,14 @@ export default {
       colors: {
         'brand-rust': '#A4523D',
         'brand-zinc': '#18181A',
-      }
+      },
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+        display: ['Outfit', 'sans-serif'],
+      },
+      animation: {
+        'in': 'fade-in-up 0.4s ease both',
+      },
     },
   },
   plugins: [],
