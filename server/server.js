@@ -161,16 +161,20 @@ app.post('/api/ats/analyze', async (req, res) => {
   }
 });
 
-// AI Suggestion Engine
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || 'dummy-key' });
+// AI Suggestion Engine — using Groq (free, OpenAI-compatible)
+// Get your free API key at: https://console.groq.com
+const groq = new OpenAI({
+  apiKey: process.env.GROQ_API_KEY || 'dummy-key',
+  baseURL: 'https://api.groq.com/openai/v1'
+});
 
 app.post('/api/ai/suggest', async (req, res) => {
   try {
     const { type, text, context } = req.body;
     
-    // Fallback if API key is not provided by the user
-    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY.trim() === '') {
-      console.warn('OPENAI_API_KEY missing - returning mock suggestions.');
+    // Fallback if Groq API key is not provided
+    if (!process.env.GROQ_API_KEY || process.env.GROQ_API_KEY.trim() === '') {
+      console.warn('GROQ_API_KEY missing - returning mock suggestions. Get a free key at https://console.groq.com');
       // Random delay to simulate API
       await new Promise(r => setTimeout(r, 600));
       
@@ -218,12 +222,12 @@ app.post('/api/ai/suggest', async (req, res) => {
       return res.status(400).json({ error: "Invalid suggestion type" });
     }
 
-    const completion = await openai.chat.completions.create({
+    const completion = await groq.chat.completions.create({
       messages: [
         {"role": "system", "content": systemPrompt},
         {"role": "user", "content": userPrompt}
       ],
-      model: "gpt-3.5-turbo",
+      model: "llama3-8b-8192", // Free Groq model — fast & capable
       temperature: 0.7,
       max_tokens: 300
     });
