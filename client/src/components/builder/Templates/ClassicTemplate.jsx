@@ -51,6 +51,24 @@ const ClassicTemplate = () => {
         </section>
       )}
 
+      {/* Projects */}
+      {resumeData.projects && resumeData.projects.length > 0 && (
+        <section className="mb-6">
+          <h2 className="text-lg font-bold uppercase border-b border-black mb-3">Projects</h2>
+          <div className="space-y-4">
+            {resumeData.projects.map(proj => (
+              <div key={proj.id}>
+                <div className="flex justify-between items-baseline">
+                  <span className="font-bold">{proj.title}</span>
+                  {proj.link && <span className="text-sm italic">{proj.link}</span>}
+                </div>
+                <p className="text-sm mt-1">{proj.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Education */}
       {education.length > 0 && (
         <section className="mb-6">
