@@ -1,3 +1,30 @@
+const localAiMock = (type, context) => {
+  const jobTitle = (context || 'Developer').toLowerCase();
+  
+  if (type === 'suggest_skills') {
+    const roleSkillMap = {
+      frontend: 'React, TypeScript, Next.js, Tailwind CSS, GraphQL',
+      backend: 'Node.js, Python, PostgreSQL, Docker, Redis',
+      fullstack: 'TypeScript, React, Node.js, Docker, AWS',
+      data: 'Python, Pandas, SQL, TensorFlow, Airflow',
+      devops: 'Kubernetes, Terraform, AWS, CI/CD, Prometheus',
+      default: 'JavaScript, Git, Agile, REST APIs, Problem Solving'
+    };
+    const matchedKey = Object.keys(roleSkillMap).find(k => jobTitle.includes(k)) || 'default';
+    return roleSkillMap[matchedKey];
+  }
+  
+  if (type === 'improve_bullet') {
+    return 'Improved bullet point (Offline Mode): Reduced overhead by 15% through implementing scalable architecture solutions, ensuring 99.9% uptime.';
+  }
+  
+  if (type === 'generate_bullets') {
+    return '• Spearheaded the development of core application features resulting in 20% increased user retention.\n• Collaborated with cross-functional teams to integrate RESTful APIs seamlessly.\n• Optimized database queries, cutting response time by an average of 40%.';
+  }
+  
+  return null;
+};
+
 export const suggestImprovement = async (type, text, context) => {
   const baseUrl = import.meta.env.VITE_API_URL || '';
   try {
@@ -9,13 +36,18 @@ export const suggestImprovement = async (type, text, context) => {
       body: JSON.stringify({ type, text, context })
     });
     
-    if (!response.ok) throw new Error('API Request Failed');
+    // Check if the backend API failed or if Vercel returned the index.html fallback
+    const contentType = response.headers.get("content-type");
+    if (!response.ok || (contentType && contentType.includes("text/html"))) {
+      console.warn("Backend API unreachable or not configured. Using offline AI mock.");
+      return localAiMock(type, context);
+    }
     
     const data = await response.json();
     return data.suggestion;
   } catch (error) {
-    console.error('AI Suggestion Error:', error);
-    return null;
+    console.warn('Network error or AI API Offline:', error.message);
+    return localAiMock(type, context);
   }
 };
 
